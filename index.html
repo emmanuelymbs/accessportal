@@ -832,30 +832,39 @@
 
 
 
-        // Convert bottom scroll to drag-down behavior
-        modalContent.addEventListener("scroll", () => {
-            const scrollBottom = modalContent.scrollTop + modalContent.clientHeight;
-            const atBottom = scrollBottom >= modalContent.scrollHeight - 5;
+        
+        dragHandle.addEventListener("touchstart", (e) => {
+            if (modalContent.scrollTop !== 0) return;
 
-            modalContent.dataset.atBottom = atBottom ? "true" : "false";
-        });
+            isDragging = true;
+            startY = e.touches[0].clientY;
+            modalContent.style.transition = "none";
+        }, { passive: true });
 
-        // Enable drag close when at bottom
-        modalContent.addEventListener("touchmove", (e) => {
-            const atBottom = modalContent.dataset.atBottom === "true";
+        dragHandle.addEventListener("touchmove", (e) => {
+            if (!isDragging) return;
 
-            if (atBottom) {
-                // Treat scroll as dragging modal downward
-                currentY = e.touches[0].clientY;
-                let diff = currentY - startY;
+            const currentY = e.touches[0].clientY;
+            const diff = currentY - startY;
 
-                if (diff > 0) {
-                    modalContent.style.transform = `translateY(${diff}px)`;
-                    e.preventDefault(); // stop underlying page scroll
-                }
+            // Only allow downward drag
+            if (diff > 0) {
+                modalContent.style.transform = `translateY(${diff}px)`;
             }
-        }, { passive: false });
+        }, { passive: true });
 
+        dragHandle.addEventListener("touchend", () => {
+            if (!isDragging) return;
+            isDragging = false;
+
+            modalContent.style.transition = "transform 0.3s ease";
+
+            if (parseInt(modalContent.style.transform.replace("translateY(", "")) > 120) {
+                closeModal();
+            } else {
+                modalContent.style.transform = "translateY(0)";
+            }
+        });
         
         
         /* --------------------------------------------------
